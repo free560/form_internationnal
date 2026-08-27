@@ -351,6 +351,7 @@
 
 <script>
 (function () {
+
   const STEP_LABELS = [
     { title: 'Destination', hint: 'Pays & université' },
     { title: 'Profil', hint: 'Informations personnelles' },
@@ -360,307 +361,1091 @@
   ];
 
   let currentStep = 0;
-  const state = { country: null, university: null };
 
-  // ---------- Reference number ----------
+  const state = {
+    country: null,
+    university: null
+  };
+
+  /* =========================================================
+     RÉFÉRENCE DU DOSSIER
+  ========================================================= */
+
   document.getElementById('ref-number').textContent =
     'GA-' + Math.floor(100000 + Math.random() * 899999);
 
-  // ---------- Stepper ----------
+
+  /* =========================================================
+     STEPPER
+  ========================================================= */
+
   const stepperEl = document.getElementById('stepper');
+
   function renderStepper() {
+
     stepperEl.innerHTML = STEP_LABELS.map((s, i) => {
+
       const done = i < currentStep;
       const active = i === currentStep;
+
       const circleClasses = done
         ? 'bg-brass text-white border-brass'
         : active
           ? 'border-ink text-ink'
           : 'border-ink/20 text-slate/30';
+
       return `
-        <li class="step-item shrink-0 lg:shrink flex items-center gap-3 py-2.5 lg:py-3 cursor-pointer group" data-goto="${i}">
-          <span class="font-mono text-xs w-7 h-7 rounded-full border flex items-center justify-center ${circleClasses} transition-colors">
+        <li
+          class="step-item shrink-0 lg:shrink flex items-center gap-3 py-2.5 lg:py-3 cursor-pointer group"
+          data-goto="${i}"
+        >
+
+          <span
+            class="font-mono text-xs w-7 h-7 rounded-full border flex items-center justify-center ${circleClasses}"
+          >
             ${done ? '✓' : i + 1}
           </span>
+
           <span class="hidden lg:block">
-            <span class="block text-sm font-medium ${active ? 'text-ink' : 'text-slate/50'} group-hover:text-ink transition-colors">${s.title}</span>
-            <span class="block text-xs text-slate/40">${s.hint}</span>
+
+            <span
+              class="block text-sm font-medium ${
+                active ? 'text-ink' : 'text-slate/50'
+              } group-hover:text-ink transition-colors"
+            >
+              ${s.title}
+            </span>
+
+            <span class="block text-xs text-slate/40">
+              ${s.hint}
+            </span>
+
           </span>
-        </li>`;
+
+        </li>
+      `;
+
     }).join('');
   }
+
   renderStepper();
 
+
   stepperEl.addEventListener('click', (e) => {
+
     const li = e.target.closest('[data-goto]');
+
     if (!li) return;
+
     const target = Number(li.dataset.goto);
-    if (target <= currentStep) goToStep(target);
+
+    if (target <= currentStep) {
+      goToStep(target);
+    }
+
   });
 
-  // ---------- Step navigation ----------
-  const steps = Array.from(document.querySelectorAll('.form-step'));
+
+  /* =========================================================
+     NAVIGATION DES ÉTAPES
+  ========================================================= */
+
+  const steps = Array.from(
+    document.querySelectorAll('.form-step')
+  );
+
   const btnPrev = document.getElementById('btn-prev');
   const btnNext = document.getElementById('btn-next');
 
+
   function goToStep(i) {
+
     steps[currentStep].classList.add('hidden');
+
     currentStep = i;
+
     steps[currentStep].classList.remove('hidden');
+
     steps[currentStep].classList.remove('step-fade');
+
     void steps[currentStep].offsetWidth;
+
     steps[currentStep].classList.add('step-fade');
+
     renderStepper();
+
     btnPrev.disabled = currentStep === 0;
-    btnNext.textContent = currentStep === steps.length - 1 ? 'Soumettre le dossier' : 'Continuer';
-    if (currentStep === steps.length - 1) renderSummary();
-    window.scrollTo({ top: document.getElementById('app-form').getBoundingClientRect().top + window.scrollY - 100, behavior: 'smooth' });
+
+    btnNext.textContent =
+      currentStep === steps.length - 1
+        ? 'Soumettre le dossier'
+        : 'Continuer';
+
+    if (currentStep === steps.length - 1) {
+      renderSummary();
+    }
+
+    window.scrollTo({
+      top:
+        document.getElementById('app-form')
+          .getBoundingClientRect().top +
+        window.scrollY -
+        100,
+
+      behavior: 'smooth'
+    });
   }
 
+
+  /* =========================================================
+     VALIDATION
+  ========================================================= */
+
   function validateStep(i) {
+
     const stepEl = steps[i];
-    const requiredFields = stepEl.querySelectorAll('[required]');
+
+    const requiredFields =
+      stepEl.querySelectorAll('[required]');
+
+
     for (const field of requiredFields) {
+
       if (field.type === 'checkbox') {
-        if (!field.checked) { field.focus(); return false; }
-      } else if (!field.value.trim()) {
+
+        if (!field.checked) {
+
+          field.focus();
+
+          return false;
+        }
+
+      }
+
+      else if (!field.value.trim()) {
+
         field.classList.add('border-bad');
+
         field.focus();
+
         return false;
-      } else {
+
+      }
+
+      else {
+
         field.classList.remove('border-bad');
+
       }
+
     }
-    if (i === 0 && (!state.country || !state.university)) {
-      document.getElementById('country-status').textContent = !state.country
-        ? 'Veuillez sélectionner un pays pour continuer.' : document.getElementById('country-status').textContent;
-      if (state.country && !state.university) {
-        document.getElementById('university-status').textContent = 'Veuillez sélectionner une université pour continuer.';
+
+
+    /* Validation pays + université */
+
+    if (
+      i === 0 &&
+      (!state.country || !state.university)
+    ) {
+
+      if (!state.country) {
+
+        document.getElementById(
+          'country-status'
+        ).textContent =
+          'Veuillez sélectionner un pays pour continuer.';
+
       }
+
+      if (state.country && !state.university) {
+
+        document.getElementById(
+          'university-status'
+        ).textContent =
+          'Veuillez sélectionner une université pour continuer.';
+
+      }
+
       return false;
     }
+
+
     return true;
   }
 
+
+  /* =========================================================
+     BOUTON SUIVANT
+  ========================================================= */
+
   btnNext.addEventListener('click', () => {
-    if (!validateStep(currentStep)) return;
-    if (currentStep === steps.length - 1) {
-      document.getElementById('submitted-note').classList.remove('hidden');
-      btnNext.disabled = true;
-      btnNext.classList.add('opacity-50', 'cursor-not-allowed');
+
+    if (!validateStep(currentStep)) {
       return;
     }
+
+
+    if (currentStep === steps.length - 1) {
+
+      document
+        .getElementById('submitted-note')
+        .classList.remove('hidden');
+
+      btnNext.disabled = true;
+
+      btnNext.classList.add(
+        'opacity-50',
+        'cursor-not-allowed'
+      );
+
+      return;
+    }
+
+
     goToStep(currentStep + 1);
+
   });
-  btnPrev.addEventListener('click', () => { if (currentStep > 0) goToStep(currentStep - 1); });
+
+
+  /* =========================================================
+     BOUTON PRÉCÉDENT
+  ========================================================= */
+
+  btnPrev.addEventListener('click', () => {
+
+    if (currentStep > 0) {
+      goToStep(currentStep - 1);
+    }
+
+  });
+
   btnPrev.disabled = true;
 
-  // ---------- Generic combobox ----------
+
+  /* =========================================================
+     COMBOBOX
+  ========================================================= */
+
   function setupCombo(rootId, { onSelect } = {}) {
-    const root = document.getElementById(rootId);
-    const trigger = root.querySelector('.combo-trigger');
-    const panel = root.querySelector('.combo-panel');
-    const search = root.querySelector('.combo-search');
-    const list = root.querySelector('.combo-list');
+
+    const root =
+      document.getElementById(rootId);
+
+    const trigger =
+      root.querySelector('.combo-trigger');
+
+    const panel =
+      root.querySelector('.combo-panel');
+
+    const search =
+      root.querySelector('.combo-search');
+
+    const list =
+      root.querySelector('.combo-list');
+
+
     let items = [];
+
     let filtered = [];
 
+
     function renderList() {
+
       if (filtered.length === 0) {
-        list.innerHTML = `<li class="px-3 py-3 text-slate/40 text-sm">Aucun résultat.</li>`;
+
+        list.innerHTML = `
+          <li class="px-3 py-3 text-slate/40 text-sm">
+            Aucun résultat.
+          </li>
+        `;
+
         return;
       }
-      list.innerHTML = filtered.slice(0, 200).map((item, idx) =>
-        `<li data-idx="${idx}" class="combo-option px-3 py-2 hover:bg-mist cursor-pointer flex items-center gap-2">${item.label}</li>`
-      ).join('');
+
+
+      list.innerHTML =
+        filtered
+          .slice(0, 300)
+          .map((item, idx) => {
+
+            return `
+              <li
+                data-idx="${idx}"
+                class="combo-option px-3 py-2 hover:bg-mist cursor-pointer flex items-center gap-2"
+              >
+                ${item.label}
+              </li>
+            `;
+
+          })
+          .join('');
     }
+
 
     function open() {
-      if (trigger.disabled) return;
-      panel.classList.remove('hidden');
-      search.value = '';
-      filtered = items;
-      renderList();
-      search.focus();
-    }
-    function close() { panel.classList.add('hidden'); }
 
-    trigger.addEventListener('click', () => {
-      panel.classList.contains('hidden') ? open() : close();
-    });
-    document.addEventListener('click', (e) => {
-      if (!root.contains(e.target)) close();
-    });
-    search.addEventListener('input', () => {
-      const q = search.value.toLowerCase();
-      filtered = items.filter(i => i.label.toLowerCase().includes(q));
-      renderList();
-    });
-    list.addEventListener('click', (e) => {
-      const li = e.target.closest('.combo-option');
-      if (!li) return;
-      const item = filtered[Number(li.dataset.idx)];
-      trigger.querySelector('.combo-selected').innerHTML = item.label;
-      trigger.querySelector('.combo-selected').classList.remove('text-slate/40');
-      close();
-      if (onSelect) onSelect(item);
-    });
-
-    return {
-      setItems(newItems) { items = newItems; filtered = newItems; },
-      enable() { trigger.disabled = false; trigger.classList.remove('opacity-40', 'cursor-not-allowed'); },
-      disable() { trigger.disabled = true; },
-      reset(placeholder) {
-        trigger.querySelector('.combo-selected').innerHTML = placeholder;
-        trigger.querySelector('.combo-selected').classList.add('text-slate/40');
-      },
-    };
-  }
-
-  const countryCombo = setupCombo('country-combo', {
-    onSelect: (item) => {
-      state.country = item;
-      state.university = null;
-      universityCombo.reset('Choisissez une université…');
-      universityCombo.disable();
-      document.getElementById('university-status').textContent = 'Chargement des universités…';
-      loadUniversities(item.raw.name);
-    },
-  });
-
-  const universityCombo = setupCombo('university-combo', {
-    onSelect: (item) => {
-      state.university = item;
-    },
-  });
-
-  // ---------- Country list API (FlagCDN — free, no key) ----------
-  // Some country names differ between this source and the university
-  // database below, so a few common aliases are tried as a fallback.
-  const COUNTRY_ALIASES = {
-    'United States': ['USA', 'United States of America'],
-    'United Kingdom': ['UK'],
-    "Côte d'Ivoire (Ivory Coast)": ['Ivory Coast', "Côte d'Ivoire"],
-    'DR Congo': ['Congo, The Democratic Republic of the', 'Democratic Republic of the Congo'],
-    'Republic of the Congo': ['Congo'],
-    'Czechia': ['Czech Republic'],
-    'Eswatini (Swaziland)': ['Swaziland', 'Eswatini'],
-    'South Korea': ['Korea, Republic of', 'Republic of Korea'],
-    'North Korea': ["Korea, Democratic People's Republic of"],
-    'Russia': ['Russian Federation'],
-    'Vatican City (Holy See)': ['Holy See', 'Vatican City'],
-    'Laos': ["Lao People's Democratic Republic"],
-    'Syria': ['Syrian Arab Republic'],
-    'Iran': ['Iran, Islamic Republic of'],
-    'Tanzania': ['Tanzania, United Republic of'],
-    'Moldova': ['Moldova, Republic of'],
-    'Brunei': ['Brunei Darussalam'],
-  };
-  // Codes that are not standalone countries (subdivisions, unions, orgs).
-  const NON_COUNTRY_CODES = new Set(['eu', 'un']);
-
-  async function loadCountries() {
-    const statusEl = document.getElementById('country-status');
-    try {
-      const res = await fetch('https://flagcdn.com/en/codes.json');
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      const data = await res.json();
-      const items = Object.entries(data)
-        .filter(([code]) => !code.includes('-') && !NON_COUNTRY_CODES.has(code))
-        .map(([code, name]) => ({
-          label: `<img src="https://flagcdn.com/20x15/${code}.png" width="20" height="15" class="rounded-sm shrink-0" alt=""> <span>${name}</span>`,
-          raw: { code, name },
-        }))
-        .sort((a, b) => a.raw.name.localeCompare(b.raw.name));
-      countryCombo.setItems(items);
-      countryCombo.enable();
-      statusEl.textContent = `${items.length} pays disponibles — commencez à taper pour filtrer.`;
-    } catch (err) {
-      statusEl.textContent = "Impossible de charger la liste des pays pour le moment. Réessayez plus tard.";
-      statusEl.classList.add('text-bad');
-    }
-  }
-
-  // ---------- Hipolabs Universities API ----------
-  async function fetchUniversitiesFor(countryName) {
-      const url =
-        "https://corsproxy.io/?" +
-        encodeURIComponent(
-          "http://universities.hipolabs.com/search?country=" + countryName
-        );
-  
-      const res = await fetch(url);
-  
-      if (!res.ok) throw new Error("HTTP " + res.status);
-  
-      return res.json();
-  }
-
-  async function loadUniversities(countryName) {
-    const statusEl = document.getElementById('university-status');
-    universityCombo.setItems([]);
-    try {
-      let data = await fetchUniversitiesFor(countryName);
-      let matchedName = countryName;
-
-      if (!data.length && COUNTRY_ALIASES[countryName]) {
-        for (const alias of COUNTRY_ALIASES[countryName]) {
-          data = await fetchUniversitiesFor(alias);
-          if (data.length) { matchedName = alias; break; }
-        }
-      }
-
-      if (!data.length) {
-        statusEl.textContent = `Aucune université référencée pour ${countryName} dans cette base. Vous pouvez saisir l'établissement dans le champ "Programme visé" ci-dessous.`;
-        universityCombo.disable();
+      if (trigger.disabled) {
         return;
       }
-      const items = data
-        .map(u => ({ label: u.name, raw: u }))
-        .sort((a, b) => a.label.localeCompare(b.label));
-      universityCombo.setItems(items);
-      universityCombo.enable();
-      statusEl.textContent = `${items.length} établissement(s) trouvé(s) pour ${matchedName}.`;
-    } catch (err) {
-      statusEl.textContent = "Impossible de charger les universités pour ce pays pour le moment.";
-      statusEl.classList.add('text-bad');
-      universityCombo.disable();
+
+      panel.classList.remove('hidden');
+
+      search.value = '';
+
+      filtered = items;
+
+      renderList();
+
+      search.focus();
     }
-  }
 
-  // ---------- File inputs ----------
-  document.querySelectorAll('.doc-drop input[type="file"]').forEach(input => {
-    input.addEventListener('change', () => {
-      const nameEl = input.closest('.doc-drop').querySelector('.file-name');
-      nameEl.textContent = input.files.length ? input.files[0].name : 'Aucun fichier choisi';
-      nameEl.classList.toggle('text-teal', input.files.length > 0);
+
+    function close() {
+
+      panel.classList.add('hidden');
+
+    }
+
+
+    trigger.addEventListener('click', () => {
+
+      if (panel.classList.contains('hidden')) {
+        open();
+      } else {
+        close();
+      }
+
     });
-  });
 
-  // ---------- Summary ----------
-  function renderSummary() {
-    const form = document.getElementById('app-form');
-    const fd = new FormData(form);
-    const rows = [
-      ['Pays', state.country ? state.country.raw.name : '—'],
-      ['Université', state.university ? state.university.label : '—'],
-      ['Programme visé', fd.get('program') || '—'],
-      ['Candidat', [fd.get('prenom'), fd.get('nom')].filter(Boolean).join(' ') || '—'],
-      ['E-mail', fd.get('email') || '—'],
-      ['Téléphone', fd.get('telephone') || '—'],
-      ['Niveau d\'études', fd.get('niveau') || '—'],
-      ['Domaine d\'étude', fd.get('domaine') || '—'],
-      ['Dernier diplôme', fd.get('diplome') || '—'],
-    ];
-    document.getElementById('summary').innerHTML = rows.map(([label, value]) => `
-      <div class="flex items-start justify-between gap-4 px-4 py-3">
-        <span class="text-slate/50">${label}</span>
-        <span class="text-ink font-medium text-right">${value}</span>
-      </div>
-    `).join('');
+
+    document.addEventListener('click', (e) => {
+
+      if (!root.contains(e.target)) {
+        close();
+      }
+
+    });
+
+
+    search.addEventListener('input', () => {
+
+      const q =
+        search.value
+          .toLowerCase()
+          .trim();
+
+
+      filtered =
+        items.filter(item =>
+          item.searchText.includes(q)
+        );
+
+
+      renderList();
+
+    });
+
+
+    list.addEventListener('click', (e) => {
+
+      const li =
+        e.target.closest('.combo-option');
+
+      if (!li) {
+        return;
+      }
+
+
+      const item =
+        filtered[Number(li.dataset.idx)];
+
+
+      trigger.querySelector(
+        '.combo-selected'
+      ).innerHTML = item.label;
+
+
+      trigger.querySelector(
+        '.combo-selected'
+      ).classList.remove(
+        'text-slate/40'
+      );
+
+
+      close();
+
+
+      if (onSelect) {
+        onSelect(item);
+      }
+
+    });
+
+
+    return {
+
+      setItems(newItems) {
+
+        items = newItems;
+
+        filtered = newItems;
+
+      },
+
+
+      enable() {
+
+        trigger.disabled = false;
+
+        trigger.classList.remove(
+          'opacity-40',
+          'cursor-not-allowed'
+        );
+
+      },
+
+
+      disable() {
+
+        trigger.disabled = true;
+
+      },
+
+
+      reset(placeholder) {
+
+        trigger.querySelector(
+          '.combo-selected'
+        ).innerHTML = placeholder;
+
+        trigger.querySelector(
+          '.combo-selected'
+        ).classList.add(
+          'text-slate/40'
+        );
+
+      }
+
+    };
+
   }
 
-  loadCountries();
+
+  /* =========================================================
+     COMBO PAYS
+  ========================================================= */
+
+  const countryCombo =
+    setupCombo('country-combo', {
+
+      onSelect: (item) => {
+
+        state.country = item;
+
+        state.university = null;
+
+
+        universityCombo.reset(
+          'Choisissez une université…'
+        );
+
+        universityCombo.disable();
+
+
+        document.getElementById(
+          'university-status'
+        ).textContent =
+          'Chargement des universités…';
+
+
+        loadUniversities(
+          item.raw.name
+        );
+
+      }
+
+    });
+
+
+  /* =========================================================
+     COMBO UNIVERSITÉ
+  ========================================================= */
+
+  const universityCombo =
+    setupCombo('university-combo', {
+
+      onSelect: (item) => {
+
+        state.university = item;
+
+      }
+
+    });
+
+
+  /* =========================================================
+     CHARGEMENT DES UNIVERSITÉS
+     DEPUIS LE FICHIER JSON LOCAL
+  ========================================================= */
+
+  let universitiesDatabase = [];
+
+
+  async function loadUniversityDatabase() {
+
+    const statusEl =
+      document.getElementById(
+        'country-status'
+      );
+
+
+    try {
+
+      statusEl.textContent =
+        'Chargement de la base des universités…';
+
+
+      const response =
+        await fetch(
+          './world_universities_and_domains.json'
+        );
+
+
+      if (!response.ok) {
+
+        throw new Error(
+          'HTTP ' + response.status
+        );
+
+      }
+
+
+      universitiesDatabase =
+        await response.json();
+
+
+      console.log(
+        'Universités chargées :',
+        universitiesDatabase.length
+      );
+
+
+      loadCountries();
+
+    }
+
+    catch (error) {
+
+      console.error(
+        'Erreur chargement JSON :',
+        error
+      );
+
+
+      statusEl.textContent =
+        'Impossible de charger la base des universités. Vérifiez que world_universities_and_domains.json est bien dans le dépôt GitHub.';
+
+
+      statusEl.classList.add(
+        'text-bad'
+      );
+
+    }
+
+  }
+
+
+  /* =========================================================
+     LISTE DES PAYS
+  ========================================================= */
+
+  function loadCountries() {
+
+    const statusEl =
+      document.getElementById(
+        'country-status'
+      );
+
+
+    if (!universitiesDatabase.length) {
+
+      statusEl.textContent =
+        'Aucun pays disponible.';
+
+      return;
+
+    }
+
+
+    const countryMap =
+      new Map();
+
+
+    universitiesDatabase.forEach(
+      university => {
+
+        if (!university.country) {
+          return;
+        }
+
+
+        const country =
+          university.country.trim();
+
+
+        if (!countryMap.has(country)) {
+
+          countryMap.set(
+            country,
+            university.alpha_two_code || ''
+          );
+
+        }
+
+      }
+    );
+
+
+    const items =
+      Array.from(countryMap.entries())
+        .map(([name, code]) => {
+
+          const lowerCode =
+            code.toLowerCase();
+
+
+          const flag =
+            lowerCode
+              ? `
+                <img
+                  src="https://flagcdn.com/20x15/${lowerCode}.png"
+                  width="20"
+                  height="15"
+                  class="rounded-sm shrink-0"
+                  alt=""
+                  loading="lazy"
+                >
+              `
+              : '';
+
+
+          return {
+
+            label: `
+              ${flag}
+              <span>${escapeHTML(name)}</span>
+            `,
+
+            searchText:
+              name.toLowerCase(),
+
+            raw: {
+              name: name,
+              code: code
+            }
+
+          };
+
+        })
+
+
+        .sort((a, b) =>
+          a.raw.name.localeCompare(
+            b.raw.name,
+            'fr'
+          )
+        );
+
+
+    countryCombo.setItems(items);
+
+    countryCombo.enable();
+
+
+    statusEl.textContent =
+      `${items.length} pays disponibles — commencez à taper pour filtrer.`;
+
+  }
+
+
+  /* =========================================================
+     UNIVERSITÉS PAR PAYS
+  ========================================================= */
+
+  function loadUniversities(countryName) {
+
+    const statusEl =
+      document.getElementById(
+        'university-status'
+      );
+
+
+    universityCombo.setItems([]);
+
+
+    const normalizedCountry =
+      normalizeText(countryName);
+
+
+    const universities =
+      universitiesDatabase.filter(
+        university => {
+
+          if (!university.country) {
+            return false;
+          }
+
+
+          return normalizeText(
+            university.country
+          ) === normalizedCountry;
+
+        }
+      );
+
+
+    if (!universities.length) {
+
+      statusEl.textContent =
+        `Aucune université référencée pour ${countryName}.`;
+
+      universityCombo.disable();
+
+      return;
+
+    }
+
+
+    const items =
+      universities
+        .filter(u => u.name)
+        .map(u => {
+
+          return {
+
+            label:
+              escapeHTML(u.name),
+
+            searchText:
+              normalizeText(
+                [
+                  u.name,
+                  ...(u.domains || [])
+                ].join(' ')
+              ),
+
+            raw: u
+
+          };
+
+        })
+
+
+        .sort((a, b) =>
+          a.raw.name.localeCompare(
+            b.raw.name,
+            'fr'
+          )
+        );
+
+
+    universityCombo.setItems(items);
+
+    universityCombo.enable();
+
+
+    statusEl.textContent =
+      `${items.length} établissement(s) trouvé(s) pour ${countryName}.`;
+
+  }
+
+
+  /* =========================================================
+     NORMALISATION DU TEXTE
+  ========================================================= */
+
+  function normalizeText(text) {
+
+    return String(text || '')
+      .normalize('NFD')
+      .replace(
+        /[\u0300-\u036f]/g,
+        ''
+      )
+      .toLowerCase()
+      .trim();
+
+  }
+
+
+  /* =========================================================
+     PROTECTION HTML
+  ========================================================= */
+
+  function escapeHTML(value) {
+
+    return String(value || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+
+  }
+
+
+  /* =========================================================
+     FICHIERS
+  ========================================================= */
+
+  document
+    .querySelectorAll(
+      '.doc-drop input[type="file"]'
+    )
+    .forEach(input => {
+
+      input.addEventListener(
+        'change',
+        () => {
+
+          const nameEl =
+            input
+              .closest('.doc-drop')
+              .querySelector(
+                '.file-name'
+              );
+
+
+          if (input.files.length) {
+
+            const file =
+              input.files[0];
+
+
+            /* Limite 5 Mo */
+
+            if (
+              file.size >
+              5 * 1024 * 1024
+            ) {
+
+              alert(
+                'Le fichier ne doit pas dépasser 5 Mo.'
+              );
+
+
+              input.value = '';
+
+              nameEl.textContent =
+                'Aucun fichier choisi';
+
+              nameEl.classList.remove(
+                'text-teal'
+              );
+
+              return;
+
+            }
+
+
+            /* Formats autorisés */
+
+            const allowedTypes = [
+              'application/pdf',
+              'image/jpeg',
+              'image/jpg'
+            ];
+
+
+            if (
+              !allowedTypes.includes(
+                file.type
+              )
+            ) {
+
+              alert(
+                'Format non autorisé. Utilisez PDF ou JPG.'
+              );
+
+
+              input.value = '';
+
+              nameEl.textContent =
+                'Aucun fichier choisi';
+
+              nameEl.classList.remove(
+                'text-teal'
+              );
+
+              return;
+
+            }
+
+
+            nameEl.textContent =
+              file.name;
+
+
+            nameEl.classList.add(
+              'text-teal'
+            );
+
+          }
+
+          else {
+
+            nameEl.textContent =
+              'Aucun fichier choisi';
+
+            nameEl.classList.remove(
+              'text-teal'
+            );
+
+          }
+
+        }
+      );
+
+    });
+
+
+  /* =========================================================
+     RÉCAPITULATIF
+  ========================================================= */
+
+  function renderSummary() {
+
+    const form =
+      document.getElementById(
+        'app-form'
+      );
+
+
+    const fd =
+      new FormData(form);
+
+
+    const rows = [
+
+      [
+        'Référence',
+        document.getElementById(
+          'ref-number'
+        ).textContent
+      ],
+
+      [
+        'Pays',
+        state.country
+          ? state.country.raw.name
+          : '—'
+      ],
+
+      [
+        'Université',
+        state.university
+          ? state.university.raw.name
+          : '—'
+      ],
+
+      [
+        'Programme visé',
+        fd.get('program') || '—'
+      ],
+
+      [
+        'Candidat',
+        [
+          fd.get('prenom'),
+          fd.get('nom')
+        ]
+          .filter(Boolean)
+          .join(' ') || '—'
+      ],
+
+      [
+        'Date de naissance',
+        fd.get('naissance') || '—'
+      ],
+
+      [
+        'Nationalité',
+        fd.get('nationalite') || '—'
+      ],
+
+      [
+        'E-mail',
+        fd.get('email') || '—'
+      ],
+
+      [
+        'Téléphone',
+        fd.get('telephone') || '—'
+      ],
+
+      [
+        'Niveau d’études',
+        fd.get('niveau') || '—'
+      ],
+
+      [
+        'Domaine d’étude',
+        fd.get('domaine') || '—'
+      ],
+
+      [
+        'Dernier diplôme',
+        fd.get('diplome') || '—'
+      ],
+
+      [
+        'Établissement précédent',
+        fd.get('etablissement_precedent') || '—'
+      ],
+
+      [
+        'Moyenne / mention',
+        fd.get('moyenne') || '—'
+      ]
+
+    ];
+
+
+    document.getElementById(
+      'summary'
+    ).innerHTML =
+
+      rows.map(
+        ([label, value]) => `
+
+          <div
+            class="flex items-start justify-between gap-4 px-4 py-3"
+          >
+
+            <span class="text-slate/50">
+              ${escapeHTML(label)}
+            </span>
+
+            <span
+              class="text-ink font-medium text-right"
+            >
+              ${escapeHTML(value)}
+            </span>
+
+          </div>
+
+        `
+      ).join('');
+
+  }
+
+
+  /* =========================================================
+     DÉMARRAGE
+  ========================================================= */
+
+  loadUniversityDatabase();
+
 })();
 </script>
 </body>
