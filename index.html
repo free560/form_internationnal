@@ -1,11 +1,667 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="refresh" content=0; url="candidature_internationale.html">
-<title>Redirection</title>
-</head>
-<body>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Formulaire de Candidature Internationale</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          ink: '#16233F',
+          mist: '#EFF2F7',
+          brass: '#B8862B',
+          brasslight: '#E4CB93',
+          teal: '#0F5257',
+          slate: '#2A3342',
+          good: '#2F855A',
+          bad: '#C0392B',
+        },
+        fontFamily: {
+          display: ['Fraunces', 'serif'],
+          body: ['Public Sans', 'sans-serif'],
+          mono: ['IBM Plex Mono', 'monospace'],
+        },
+      },
+    },
+  }
+</script>
+<style>
+  body { font-family: 'Public Sans', sans-serif; }
+  .font-display { font-family: 'Fraunces', serif; font-optical-sizing: auto; }
+  .font-mono { font-family: 'IBM Plex Mono', monospace; }
 
+  /* Perforated stub edge on the sidebar dossier card */
+  .stub-edge::after {
+    content: "";
+    position: absolute;
+    right: -1px;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background-image: repeating-linear-gradient(to bottom, #C7CEDB 0 8px, transparent 8px 16px);
+  }
+  .stub-notch {
+    position: absolute;
+    right: -10px;
+    width: 20px;
+    height: 20px;
+    border-radius: 9999px;
+    background: #EFF2F7;
+  }
+  @media (max-width: 1023px) {
+    .stub-edge::after, .stub-notch { display: none; }
+  }
+
+  .combo-panel { max-height: 240px; }
+  .combo-panel::-webkit-scrollbar { width: 8px; }
+  .combo-panel::-webkit-scrollbar-thumb { background: #C7CEDB; border-radius: 8px; }
+
+  input[type="checkbox"].seal:checked { background-color: #B8862B; border-color: #B8862B; }
+
+  .step-fade { animation: fadeStep .35s ease both; }
+  @keyframes fadeStep { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+  ::selection { background: #E4CB93; }
+
+  .field-underline:focus-within { border-color: #16233F; }
+
+  .stamp {
+    transform: rotate(-8deg);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .step-fade { animation: none; }
+  }
+</style>
+</head>
+<body class="bg-mist text-slate">
+
+<!-- Header -->
+<header class="border-b border-ink/10 bg-white">
+  <div class="max-w-6xl mx-auto px-6 lg:px-10 py-5 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-full border-2 border-brass flex items-center justify-center">
+        <span class="font-display font-semibold text-ink text-sm">GA</span>
+      </div>
+      <div>
+        <p class="font-display text-lg leading-none text-ink">GlobalAdmit</p>
+        <p class="font-mono text-[10px] tracking-widest text-slate/50 uppercase mt-0.5">Dossier de candidature</p>
+      </div>
+    </div>
+    <div class="hidden sm:flex items-center gap-2 font-mono text-[11px] uppercase tracking-widest text-slate/50">
+      <span>Réf.</span>
+      <span id="ref-number" class="text-ink font-semibold">—</span>
+    </div>
+  </div>
+</header>
+
+<!-- Hero -->
+<section class="bg-ink text-mist relative overflow-hidden">
+  <div class="absolute inset-0 opacity-[0.07]" style="background-image: radial-gradient(circle, #fff 1px, transparent 1px); background-size: 22px 22px;"></div>
+  <div class="max-w-6xl mx-auto px-6 lg:px-10 py-14 relative">
+    <p class="font-mono text-xs uppercase tracking-[0.25em] text-brasslight mb-4">Admissions internationales · 2027</p>
+    <h1 class="font-display text-4xl sm:text-5xl leading-[1.1] max-w-2xl">Postulez dans l'université de votre choix, où qu'elle soit.</h1>
+    <p class="mt-5 max-w-xl text-mist/70 text-[15px] leading-relaxed">Choisissez un pays, sélectionnez un établissement parmi la liste réelle de ses universités, puis complétez votre dossier en quelques étapes.</p>
+  </div>
+</section>
+
+<!-- Main -->
+<main class="max-w-6xl mx-auto px-6 lg:px-10 py-10 lg:py-14">
+  <div class="grid lg:grid-cols-[280px_1fr] gap-8">
+
+    <!-- Sidebar / Stepper -->
+    <aside class="relative">
+      <div class="lg:sticky lg:top-8 bg-white rounded-lg border border-ink/10 relative stub-edge">
+        <div class="stub-notch -top-[10px] hidden lg:block"></div>
+        <div class="stub-notch -bottom-[10px] hidden lg:block"></div>
+        <ol id="stepper" class="p-5 flex lg:flex-col gap-1 lg:gap-0 overflow-x-auto lg:overflow-visible">
+          <!-- filled by JS -->
+        </ol>
+      </div>
+    </aside>
+
+    <!-- Form -->
+    <section class="bg-white rounded-lg border border-ink/10 p-6 sm:p-9 min-h-[520px] flex flex-col">
+      <form id="app-form" class="flex-1 flex flex-col" novalidate>
+
+        <!-- STEP 1 : Destination -->
+        <div class="form-step step-fade" data-step="0">
+          <p class="font-mono text-xs uppercase tracking-widest text-brass mb-1">Étape 1 / 5</p>
+          <h2 class="font-display text-2xl text-ink mb-1">Choisissez votre destination</h2>
+          <p class="text-sm text-slate/60 mb-7">La liste des universités se met à jour selon le pays sélectionné.</p>
+
+          <div class="space-y-6">
+            <div>
+              <label class="block text-sm font-medium text-ink mb-2">Pays de destination </label>
+              <div class="relative" id="country-combo">
+                <button type="button" class="combo-trigger w-full flex items-center justify-between border-b-2 border-ink/15 py-2.5 text-left field-underline" data-field="country">
+                  <span class="combo-selected flex items-center gap-2 text-slate/40">Sélectionner un pays…</span>
+                  <svg class="w-4 h-4 text-slate/40 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </button>
+                <div class="combo-panel hidden absolute z-20 mt-1 w-full bg-white border border-ink/10 rounded-md shadow-lg overflow-hidden">
+                  <div class="p-2 border-b border-ink/10">
+                    <input type="text" class="combo-search w-full text-sm px-3 py-2 rounded bg-mist outline-none" placeholder="Rechercher un pays…">
+                  </div>
+                  <ul class="combo-list overflow-y-auto combo-panel text-sm"></ul>
+                </div>
+              </div>
+              <p class="mt-1.5 text-xs text-slate/40" id="country-status">Chargement de la liste des pays…</p>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-ink mb-2">Université</label>
+              <div class="relative" id="university-combo">
+                <button type="button" disabled class="combo-trigger w-full flex items-center justify-between border-b-2 border-ink/15 py-2.5 text-left field-underline disabled:opacity-40 disabled:cursor-not-allowed" data-field="university">
+                  <span class="combo-selected flex items-center gap-2 text-slate/40">Choisissez d'abord un pays…</span>
+                  <svg class="w-4 h-4 text-slate/40 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </button>
+                <div class="combo-panel hidden absolute z-20 mt-1 w-full bg-white border border-ink/10 rounded-md shadow-lg overflow-hidden">
+                  <div class="p-2 border-b border-ink/10">
+                    <input type="text" class="combo-search w-full text-sm px-3 py-2 rounded bg-mist outline-none" placeholder="Rechercher une université…">
+                  </div>
+                  <ul class="combo-list overflow-y-auto combo-panel text-sm"></ul>
+                </div>
+              </div>
+              <p class="mt-1.5 text-xs text-slate/40" id="university-status">En attente du choix du pays.</p>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-ink mb-2">Programme visé</label>
+              <input type="text" name="program" placeholder="ex. Licence en Génie Logiciel" class="w-full border-b-2 border-ink/15 py-2.5 outline-none field-underline bg-transparent text-sm placeholder:text-slate/30">
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 2 : Profil du candidat -->
+        <div class="form-step step-fade hidden" data-step="1">
+          <p class="font-mono text-xs uppercase tracking-widest text-brass mb-1">Étape 2 / 5</p>
+          <h2 class="font-display text-2xl text-ink mb-1">Profil du candidat</h2>
+          <p class="text-sm text-slate/60 mb-7">Vos informations personnelles telles qu'elles figurent sur votre passeport.</p>
+
+          <div class="grid sm:grid-cols-2 gap-x-6 gap-y-6">
+            <div>
+              <label class="block text-sm font-medium text-ink mb-2">Nom </label>
+              <input required name="nom" type="text" class="w-full border-b-2 border-ink/15 py-2.5 outline-none field-underline bg-transparent text-sm">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-ink mb-2">Prénom </label>
+              <input required name="prenom" type="text" class="w-full border-b-2 border-ink/15 py-2.5 outline-none field-underline bg-transparent text-sm">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-ink mb-2">Date de naissance </label>
+              <input required name="naissance" type="date" class="w-full border-b-2 border-ink/15 py-2.5 outline-none field-underline bg-transparent text-sm">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-ink mb-2">Nationalité </label>
+              <input required name="nationalite" type="text" placeholder="ex. Burundaise" class="w-full border-b-2 border-ink/15 py-2.5 outline-none field-underline bg-transparent text-sm placeholder:text-slate/30">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-ink mb-2">Adresse e-mail </label>
+              <input required name="email" type="email" class="w-full border-b-2 border-ink/15 py-2.5 outline-none field-underline bg-transparent text-sm">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-ink mb-2">Téléphone </label>
+              <input required name="telephone" type="tel" placeholder="+257 …" class="w-full border-b-2 border-ink/15 py-2.5 outline-none field-underline bg-transparent text-sm placeholder:text-slate/30">
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 3 : Parcours académique -->
+        <div class="form-step step-fade hidden" data-step="2">
+          <p class="font-mono text-xs uppercase tracking-widest text-brass mb-1">Étape 3 / 5</p>
+          <h2 class="font-display text-2xl text-ink mb-1">Parcours académique</h2>
+          <p class="text-sm text-slate/60 mb-7">Votre niveau d'étude actuel et le programme envisagé.</p>
+
+          <div class="grid sm:grid-cols-2 gap-x-6 gap-y-6">
+            <div>
+              <label class="block text-sm font-medium text-ink mb-2">Niveau d'études visé </label>
+              <select required name="niveau" class="w-full border-b-2 border-ink/15 py-2.5 outline-none field-underline bg-transparent text-sm">
+                <option value="">Sélectionner…</option>
+                <option>Licence / Bachelor</option>
+                <option>Master</option>
+                <option>Doctorat</option>
+                <option>Échange académique</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-ink mb-2">Domaine d'étude </label>
+              <input required name="domaine" type="text" placeholder="ex. Génie Logiciel" class="w-full border-b-2 border-ink/15 py-2.5 outline-none field-underline bg-transparent text-sm placeholder:text-slate/30">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-ink mb-2">Dernier diplôme obtenu </label>
+              <input required name="diplome" type="text" placeholder="ex. Baccalauréat scientifique" class="w-full border-b-2 border-ink/15 py-2.5 outline-none field-underline bg-transparent text-sm placeholder:text-slate/30">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-ink mb-2">Établissement précédent </label>
+              <input required name="etablissement_precedent" type="text" class="w-full border-b-2 border-ink/15 py-2.5 outline-none field-underline bg-transparent text-sm">
+            </div>
+            <div class="sm:col-span-2">
+              <label class="block text-sm font-medium text-ink mb-2">Moyenne / mention obtenue</label>
+              <input name="moyenne" type="text" placeholder="ex. 78% ou Mention Bien" class="w-full border-b-2 border-ink/15 py-2.5 outline-none field-underline bg-transparent text-sm placeholder:text-slate/30">
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 4 : Documents -->
+        <div class="form-step step-fade hidden" data-step="3">
+          <p class="font-mono text-xs uppercase tracking-widest text-brass mb-1">Étape 4 / 5</p>
+          <h2 class="font-display text-2xl text-ink mb-1">Pièces justificatives</h2>
+          <p class="text-sm text-slate/60 mb-7">Formats acceptés : PDF, JPG — 5 Mo maximum par fichier.</p>
+
+          <div class="space-y-4">
+            <label class="doc-drop flex items-center justify-between gap-4 border border-dashed border-ink/20 rounded-md p-4 cursor-pointer hover:border-brass/60 transition-colors">
+              <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-full bg-mist flex items-center justify-center shrink-0">
+                  <svg class="w-4 h-4 text-ink" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                </div>
+                <div>
+                  <p class="text-sm font-medium text-ink">Relevé de notes</p>
+                  <p class="text-xs text-slate/50 file-name">Aucun fichier choisi</p>
+                </div>
+              </div>
+              <span class="font-mono text-[11px] uppercase tracking-widest text-teal shrink-0">Parcourir</span>
+              <input type="file" name="doc_releve" class="hidden">
+            </label>
+
+            <label class="doc-drop flex items-center justify-between gap-4 border border-dashed border-ink/20 rounded-md p-4 cursor-pointer hover:border-brass/60 transition-colors">
+              <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-full bg-mist flex items-center justify-center shrink-0">
+                  <svg class="w-4 h-4 text-ink" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                </div>
+                <div>
+                  <p class="text-sm font-medium text-ink">Lettre de motivation</p>
+                  <p class="text-xs text-slate/50 file-name">Aucun fichier choisi</p>
+                </div>
+              </div>
+              <span class="font-mono text-[11px] uppercase tracking-widest text-teal shrink-0">Parcourir</span>
+              <input type="file" name="doc_lettre" class="hidden">
+            </label>
+
+            <label class="doc-drop flex items-center justify-between gap-4 border border-dashed border-ink/20 rounded-md p-4 cursor-pointer hover:border-brass/60 transition-colors">
+              <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-full bg-mist flex items-center justify-center shrink-0">
+                  <svg class="w-4 h-4 text-ink" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                </div>
+                <div>
+                  <p class="text-sm font-medium text-ink">Curriculum vitae</p>
+                  <p class="text-xs text-slate/50 file-name">Aucun fichier choisi</p>
+                </div>
+              </div>
+              <span class="font-mono text-[11px] uppercase tracking-widest text-teal shrink-0">Parcourir</span>
+              <input type="file" name="doc_cv" class="hidden">
+            </label>
+
+            <label class="doc-drop flex items-center justify-between gap-4 border border-dashed border-ink/20 rounded-md p-4 cursor-pointer hover:border-brass/60 transition-colors">
+              <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-full bg-mist flex items-center justify-center shrink-0">
+                  <svg class="w-4 h-4 text-ink" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h6l6 6v10a2 2 0 01-2 2H7a2 2 0 01-2-2V5z"/></svg>
+                </div>
+                <div>
+                  <p class="text-sm font-medium text-ink">Copie du passeport</p>
+                  <p class="text-xs text-slate/50 file-name">Aucun fichier choisi</p>
+                </div>
+              </div>
+              <span class="font-mono text-[11px] uppercase tracking-widest text-teal shrink-0">Parcourir</span>
+              <input type="file" name="doc_passeport" class="hidden">
+            </label>
+          </div>
+        </div>
+
+        <!-- STEP 5 : Récapitulatif -->
+        <div class="form-step step-fade hidden" data-step="4">
+          <p class="font-mono text-xs uppercase tracking-widest text-brass mb-1">Étape 5 / 5</p>
+          <h2 class="font-display text-2xl text-ink mb-1">Vérification &amp; envoi</h2>
+          <p class="text-sm text-slate/60 mb-7">Relisez votre dossier avant de le soumettre.</p>
+
+          <div id="summary" class="rounded-md border border-ink/10 divide-y divide-ink/10 text-sm"></div>
+
+          <label class="flex items-start gap-3 mt-7 text-sm text-slate/70">
+            <input required type="checkbox" name="confirm" class="seal mt-0.5 w-4 h-4 rounded border-ink/30 text-brass focus:ring-brass">
+            <span>Je certifie que les informations fournies sont exactes et complètes.</span>
+          </label>
+
+          <div id="submitted-note" class="hidden mt-6 flex items-center gap-3 bg-good/10 border border-good/30 text-good rounded-md px-4 py-3 text-sm">
+            <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            <span>Dossier prêt à être transmis à l'établissement sélectionné.</span>
+          </div>
+        </div>
+
+        <!-- Nav buttons -->
+        <div class="mt-auto pt-9 flex items-center justify-between border-t border-ink/10 mt-9">
+          <button type="button" id="btn-prev" class="font-mono text-xs uppercase tracking-widest text-slate/50 hover:text-ink transition-colors disabled:opacity-0" >&larr; Précédent</button>
+          <button type="button" id="btn-next" class="bg-ink text-mist font-medium text-sm px-6 py-3 rounded-md hover:bg-teal transition-colors">Continuer</button>
+        </div>
+
+      </form>
+    </section>
+  </div>
+</main>
+
+<footer class="border-t border-ink/10 mt-6">
+  <div class="max-w-6xl mx-auto px-6 lg:px-10 py-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate/40 font-mono uppercase tracking-widest">
+    <span>GlobalAdmit: Dossier de candidature</span>
+    <span>Données pays &amp; universités via API publiques</span>
+  </div>
+</footer>
+
+<script>
+(function () {
+  const STEP_LABELS = [
+    { title: 'Destination', hint: 'Pays & université' },
+    { title: 'Profil', hint: 'Informations personnelles' },
+    { title: 'Parcours', hint: 'Cursus académique' },
+    { title: 'Documents', hint: 'Pièces justificatives' },
+    { title: 'Envoi', hint: 'Vérification finale' },
+  ];
+
+  let currentStep = 0;
+  const state = { country: null, university: null };
+
+  // ---------- Reference number ----------
+  document.getElementById('ref-number').textContent =
+    'GA-' + Math.floor(100000 + Math.random() * 899999);
+
+  // ---------- Stepper ----------
+  const stepperEl = document.getElementById('stepper');
+  function renderStepper() {
+    stepperEl.innerHTML = STEP_LABELS.map((s, i) => {
+      const done = i < currentStep;
+      const active = i === currentStep;
+      const circleClasses = done
+        ? 'bg-brass text-white border-brass'
+        : active
+          ? 'border-ink text-ink'
+          : 'border-ink/20 text-slate/30';
+      return `
+        <li class="step-item shrink-0 lg:shrink flex items-center gap-3 py-2.5 lg:py-3 cursor-pointer group" data-goto="${i}">
+          <span class="font-mono text-xs w-7 h-7 rounded-full border flex items-center justify-center ${circleClasses} transition-colors">
+            ${done ? '✓' : i + 1}
+          </span>
+          <span class="hidden lg:block">
+            <span class="block text-sm font-medium ${active ? 'text-ink' : 'text-slate/50'} group-hover:text-ink transition-colors">${s.title}</span>
+            <span class="block text-xs text-slate/40">${s.hint}</span>
+          </span>
+        </li>`;
+    }).join('');
+  }
+  renderStepper();
+
+  stepperEl.addEventListener('click', (e) => {
+    const li = e.target.closest('[data-goto]');
+    if (!li) return;
+    const target = Number(li.dataset.goto);
+    if (target <= currentStep) goToStep(target);
+  });
+
+  // ---------- Step navigation ----------
+  const steps = Array.from(document.querySelectorAll('.form-step'));
+  const btnPrev = document.getElementById('btn-prev');
+  const btnNext = document.getElementById('btn-next');
+
+  function goToStep(i) {
+    steps[currentStep].classList.add('hidden');
+    currentStep = i;
+    steps[currentStep].classList.remove('hidden');
+    steps[currentStep].classList.remove('step-fade');
+    void steps[currentStep].offsetWidth;
+    steps[currentStep].classList.add('step-fade');
+    renderStepper();
+    btnPrev.disabled = currentStep === 0;
+    btnNext.textContent = currentStep === steps.length - 1 ? 'Soumettre le dossier' : 'Continuer';
+    if (currentStep === steps.length - 1) renderSummary();
+    window.scrollTo({ top: document.getElementById('app-form').getBoundingClientRect().top + window.scrollY - 100, behavior: 'smooth' });
+  }
+
+  function validateStep(i) {
+    const stepEl = steps[i];
+    const requiredFields = stepEl.querySelectorAll('[required]');
+    for (const field of requiredFields) {
+      if (field.type === 'checkbox') {
+        if (!field.checked) { field.focus(); return false; }
+      } else if (!field.value.trim()) {
+        field.classList.add('border-bad');
+        field.focus();
+        return false;
+      } else {
+        field.classList.remove('border-bad');
+      }
+    }
+    if (i === 0 && (!state.country || !state.university)) {
+      document.getElementById('country-status').textContent = !state.country
+        ? 'Veuillez sélectionner un pays pour continuer.' : document.getElementById('country-status').textContent;
+      if (state.country && !state.university) {
+        document.getElementById('university-status').textContent = 'Veuillez sélectionner une université pour continuer.';
+      }
+      return false;
+    }
+    return true;
+  }
+
+  btnNext.addEventListener('click', () => {
+    if (!validateStep(currentStep)) return;
+    if (currentStep === steps.length - 1) {
+      document.getElementById('submitted-note').classList.remove('hidden');
+      btnNext.disabled = true;
+      btnNext.classList.add('opacity-50', 'cursor-not-allowed');
+      return;
+    }
+    goToStep(currentStep + 1);
+  });
+  btnPrev.addEventListener('click', () => { if (currentStep > 0) goToStep(currentStep - 1); });
+  btnPrev.disabled = true;
+
+  // ---------- Generic combobox ----------
+  function setupCombo(rootId, { onSelect } = {}) {
+    const root = document.getElementById(rootId);
+    const trigger = root.querySelector('.combo-trigger');
+    const panel = root.querySelector('.combo-panel');
+    const search = root.querySelector('.combo-search');
+    const list = root.querySelector('.combo-list');
+    let items = [];
+    let filtered = [];
+
+    function renderList() {
+      if (filtered.length === 0) {
+        list.innerHTML = `<li class="px-3 py-3 text-slate/40 text-sm">Aucun résultat.</li>`;
+        return;
+      }
+      list.innerHTML = filtered.slice(0, 200).map((item, idx) =>
+        `<li data-idx="${idx}" class="combo-option px-3 py-2 hover:bg-mist cursor-pointer flex items-center gap-2">${item.label}</li>`
+      ).join('');
+    }
+
+    function open() {
+      if (trigger.disabled) return;
+      panel.classList.remove('hidden');
+      search.value = '';
+      filtered = items;
+      renderList();
+      search.focus();
+    }
+    function close() { panel.classList.add('hidden'); }
+
+    trigger.addEventListener('click', () => {
+      panel.classList.contains('hidden') ? open() : close();
+    });
+    document.addEventListener('click', (e) => {
+      if (!root.contains(e.target)) close();
+    });
+    search.addEventListener('input', () => {
+      const q = search.value.toLowerCase();
+      filtered = items.filter(i => i.label.toLowerCase().includes(q));
+      renderList();
+    });
+    list.addEventListener('click', (e) => {
+      const li = e.target.closest('.combo-option');
+      if (!li) return;
+      const item = filtered[Number(li.dataset.idx)];
+      trigger.querySelector('.combo-selected').innerHTML = item.label;
+      trigger.querySelector('.combo-selected').classList.remove('text-slate/40');
+      close();
+      if (onSelect) onSelect(item);
+    });
+
+    return {
+      setItems(newItems) { items = newItems; filtered = newItems; },
+      enable() { trigger.disabled = false; trigger.classList.remove('opacity-40', 'cursor-not-allowed'); },
+      disable() { trigger.disabled = true; },
+      reset(placeholder) {
+        trigger.querySelector('.combo-selected').innerHTML = placeholder;
+        trigger.querySelector('.combo-selected').classList.add('text-slate/40');
+      },
+    };
+  }
+
+  const countryCombo = setupCombo('country-combo', {
+    onSelect: (item) => {
+      state.country = item;
+      state.university = null;
+      universityCombo.reset('Choisissez une université…');
+      universityCombo.disable();
+      document.getElementById('university-status').textContent = 'Chargement des universités…';
+      loadUniversities(item.raw.name);
+    },
+  });
+
+  const universityCombo = setupCombo('university-combo', {
+    onSelect: (item) => {
+      state.university = item;
+    },
+  });
+
+  // ---------- Country list API (FlagCDN — free, no key) ----------
+  // Some country names differ between this source and the university
+  // database below, so a few common aliases are tried as a fallback.
+  const COUNTRY_ALIASES = {
+    'United States': ['USA', 'United States of America'],
+    'United Kingdom': ['UK'],
+    "Côte d'Ivoire (Ivory Coast)": ['Ivory Coast', "Côte d'Ivoire"],
+    'DR Congo': ['Congo, The Democratic Republic of the', 'Democratic Republic of the Congo'],
+    'Republic of the Congo': ['Congo'],
+    'Czechia': ['Czech Republic'],
+    'Eswatini (Swaziland)': ['Swaziland', 'Eswatini'],
+    'South Korea': ['Korea, Republic of', 'Republic of Korea'],
+    'North Korea': ["Korea, Democratic People's Republic of"],
+    'Russia': ['Russian Federation'],
+    'Vatican City (Holy See)': ['Holy See', 'Vatican City'],
+    'Laos': ["Lao People's Democratic Republic"],
+    'Syria': ['Syrian Arab Republic'],
+    'Iran': ['Iran, Islamic Republic of'],
+    'Tanzania': ['Tanzania, United Republic of'],
+    'Moldova': ['Moldova, Republic of'],
+    'Brunei': ['Brunei Darussalam'],
+  };
+  // Codes that are not standalone countries (subdivisions, unions, orgs).
+  const NON_COUNTRY_CODES = new Set(['eu', 'un']);
+
+  async function loadCountries() {
+    const statusEl = document.getElementById('country-status');
+    try {
+      const res = await fetch('https://flagcdn.com/en/codes.json');
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const data = await res.json();
+      const items = Object.entries(data)
+        .filter(([code]) => !code.includes('-') && !NON_COUNTRY_CODES.has(code))
+        .map(([code, name]) => ({
+          label: `<img src="https://flagcdn.com/20x15/${code}.png" width="20" height="15" class="rounded-sm shrink-0" alt=""> <span>${name}</span>`,
+          raw: { code, name },
+        }))
+        .sort((a, b) => a.raw.name.localeCompare(b.raw.name));
+      countryCombo.setItems(items);
+      countryCombo.enable();
+      statusEl.textContent = `${items.length} pays disponibles — commencez à taper pour filtrer.`;
+    } catch (err) {
+      statusEl.textContent = "Impossible de charger la liste des pays pour le moment. Réessayez plus tard.";
+      statusEl.classList.add('text-bad');
+    }
+  }
+
+  // ---------- Hipolabs Universities API ----------
+  async function fetchUniversitiesFor(countryName) {
+      const url =
+        "https://corsproxy.io/?" +
+        encodeURIComponent(
+          "http://universities.hipolabs.com/search?country=" + countryName
+        );
+  
+      const res = await fetch(url);
+  
+      if (!res.ok) throw new Error("HTTP " + res.status);
+  
+      return res.json();
+  }
+
+  async function loadUniversities(countryName) {
+    const statusEl = document.getElementById('university-status');
+    universityCombo.setItems([]);
+    try {
+      let data = await fetchUniversitiesFor(countryName);
+      let matchedName = countryName;
+
+      if (!data.length && COUNTRY_ALIASES[countryName]) {
+        for (const alias of COUNTRY_ALIASES[countryName]) {
+          data = await fetchUniversitiesFor(alias);
+          if (data.length) { matchedName = alias; break; }
+        }
+      }
+
+      if (!data.length) {
+        statusEl.textContent = `Aucune université référencée pour ${countryName} dans cette base. Vous pouvez saisir l'établissement dans le champ "Programme visé" ci-dessous.`;
+        universityCombo.disable();
+        return;
+      }
+      const items = data
+        .map(u => ({ label: u.name, raw: u }))
+        .sort((a, b) => a.label.localeCompare(b.label));
+      universityCombo.setItems(items);
+      universityCombo.enable();
+      statusEl.textContent = `${items.length} établissement(s) trouvé(s) pour ${matchedName}.`;
+    } catch (err) {
+      statusEl.textContent = "Impossible de charger les universités pour ce pays pour le moment.";
+      statusEl.classList.add('text-bad');
+      universityCombo.disable();
+    }
+  }
+
+  // ---------- File inputs ----------
+  document.querySelectorAll('.doc-drop input[type="file"]').forEach(input => {
+    input.addEventListener('change', () => {
+      const nameEl = input.closest('.doc-drop').querySelector('.file-name');
+      nameEl.textContent = input.files.length ? input.files[0].name : 'Aucun fichier choisi';
+      nameEl.classList.toggle('text-teal', input.files.length > 0);
+    });
+  });
+
+  // ---------- Summary ----------
+  function renderSummary() {
+    const form = document.getElementById('app-form');
+    const fd = new FormData(form);
+    const rows = [
+      ['Pays', state.country ? state.country.raw.name : '—'],
+      ['Université', state.university ? state.university.label : '—'],
+      ['Programme visé', fd.get('program') || '—'],
+      ['Candidat', [fd.get('prenom'), fd.get('nom')].filter(Boolean).join(' ') || '—'],
+      ['E-mail', fd.get('email') || '—'],
+      ['Téléphone', fd.get('telephone') || '—'],
+      ['Niveau d\'études', fd.get('niveau') || '—'],
+      ['Domaine d\'étude', fd.get('domaine') || '—'],
+      ['Dernier diplôme', fd.get('diplome') || '—'],
+    ];
+    document.getElementById('summary').innerHTML = rows.map(([label, value]) => `
+      <div class="flex items-start justify-between gap-4 px-4 py-3">
+        <span class="text-slate/50">${label}</span>
+        <span class="text-ink font-medium text-right">${value}</span>
+      </div>
+    `).join('');
+  }
+
+  loadCountries();
+})();
+</script>
 </body>
 </html>
