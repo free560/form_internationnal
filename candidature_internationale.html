@@ -583,7 +583,7 @@
 
   // ---------- Hipolabs Universities API ----------
   async function fetchUniversitiesFor(countryName) {
-    const res = await fetch('http://universities.hipolabs.com/search?country=' + encodeURIComponent(countryName));
+    const res = await fetch('https://universities.hipolabs.com/search?country=' + encodeURIComponent(countryName));
     if (!res.ok) throw new Error('HTTP ' + res.status);
     return res.json();
   }
