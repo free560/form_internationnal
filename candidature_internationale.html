@@ -583,12 +583,16 @@
 
   // ---------- Hipolabs Universities API ----------
   async function fetchUniversitiesFor(countryName) {
-      const res = await fetch(
-          'https://universities.hipolabs.com/search?country=' +
-          encodeURIComponent(countryName)
-      );
+      const url =
+        "https://corsproxy.io/?" +
+        encodeURIComponent(
+          "http://universities.hipolabs.com/search?country=" + countryName
+        );
   
-      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const res = await fetch(url);
+  
+      if (!res.ok) throw new Error("HTTP " + res.status);
+  
       return res.json();
   }
 
